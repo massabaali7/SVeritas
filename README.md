@@ -1,4 +1,4 @@
-# 🧪 Speaker Verification Benchmark Framework
+# Speaker Verification Benchmark Framework
 
 A modular and extensible framework to benchmark **Speaker Verification** systems under clean and corrupted conditions with different models and augmentations.
 
