@@ -152,3 +152,5 @@ def build_augmentation(simulate, config):
         return MyAug(...)
     ...
 ```
+# Run simulation on a single sample
+```python testing/simulate_single_sample.py --simulate 'echo' --waveform filename.wav ```
