@@ -10,6 +10,7 @@ A modular and extensible framework to benchmark **Speaker Verification** systems
 speaker-verification-benchmark/
 ├── datasets/              # Dataset loaders (LibriSpeech, VoxCeleb, etc.)
 │   ├── librispeech.py
+│   ├── tedlium.py
 │   └── build_data.py
 ├── models/                # Speaker embedding models
 │   ├── ecapa2.py
