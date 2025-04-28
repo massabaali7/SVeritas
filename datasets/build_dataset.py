@@ -1,6 +1,6 @@
 from .libirspeech import LibriSpeech
 from .tedlium    import TEDLIUM
-from .ami        import AMI
+from .ami        import Ami
 
 def build_dataset(dataset_name, config, device):
     if dataset_name == 'LibriSpeech':
@@ -16,7 +16,7 @@ def build_dataset(dataset_name, config, device):
             partition="release3", 
             cache_dir=config['data_cache_dir']
     elif dataset_name == 'AMI':
-        dataset = AMI(
+        dataset = Ami(
             "edinburghcstr/ami",  
             split='test',        
             partition="ihm",   #ihm or sdm     
