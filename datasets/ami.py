@@ -1,7 +1,7 @@
 from datasets import load_dataset
 import torch
 
-class Ami(torch.nn.Module):
+class AMI(torch.nn.Module):
     def __init__(
         self,
         dataset_name: str = "edinburghcstr/ami",
