@@ -27,6 +27,11 @@ def build_dataset(dataset_name, config, device):
             dataset_name="macabdul9/voxpopuli_en_accented_SpeakerVerification", 
             split='test', 
             cache_dir=config['data_cache_dir'])
+    elif dataset_name == 'VCTK':
+        dataset = VCTK(
+            dataset_name="DynamicSuperb/SpeakerVerification_VCTK", 
+            split='test', 
+            cache_dir=config['data_cache_dir']   
     else: 
         raise NotImplementedError
 
