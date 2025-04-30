@@ -8,7 +8,7 @@ A modular and extensible framework to benchmark **Speaker Verification** systems
 
 ```bash
 speaker-verification-benchmark/
-├── datasets/              # Dataset loaders (LibriSpeech, VoxCeleb, etc.)
+├── datasets/                    # Dataset loaders (LibriSpeech, VoxCeleb, etc.)
 │   ├── build_data.py
 │   ├── tedlium.py
 │   ├── vctk.py
