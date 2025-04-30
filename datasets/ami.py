@@ -1,7 +1,7 @@
 from datasets import load_dataset
 import torch
 
-class Ami(torch.nn.Module):
+class AMI(torch.nn.Module):
     def __init__(
         self,
         dataset_name: str = "edinburghcstr/ami",
@@ -11,9 +11,9 @@ class Ami(torch.nn.Module):
     ):
         super(AMI, self).__init__()
         self.dataset_name = dataset_name
-        self.partition    = partition
-        self.split        = split
-        self.cache_dir    = cache_dir
+        self.partition = partition
+        self.split = split
+        self.cache_dir = cache_dir
 
     def forward(self, audio):
         return load_dataset(
