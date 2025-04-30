@@ -1,7 +1,8 @@
 from .libirspeech import LibriSpeech
-from .tedlium    import TEDLIUM
-from .ami        import AMI
-from .voxpopuli import VoxPopuli
+from .tedlium     import TEDLIUM
+from .ami         import AMI
+from .voxpopuli   import VoxPopuli
+from .vctk        import VCTK
 
 def build_dataset(dataset_name, config, device):
     if dataset_name == 'LibriSpeech':
