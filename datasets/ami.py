@@ -16,9 +16,10 @@ class AMI(torch.nn.Module):
         self.cache_dir = cache_dir
 
     def forward(self, audio):
-        return load_dataset(
+        dataset = load_dataset(
             self.dataset_name,
             self.partition,
             split=self.split,
             cache_dir=self.cache_dir
         )
+        return dataset
