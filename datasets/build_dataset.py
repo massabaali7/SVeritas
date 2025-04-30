@@ -32,7 +32,7 @@ def build_dataset(dataset_name, config, device):
         dataset = VCTK(
             dataset_name="DynamicSuperb/SpeakerVerification_VCTK", 
             split='test', 
-            cache_dir=config['data_cache_dir']    
+            cache_dir=config['data_cache_dir'])    
     else: 
         raise NotImplementedError
 
