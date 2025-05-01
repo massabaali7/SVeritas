@@ -29,3 +29,9 @@ output_dir: "./output_dir/"
 noise_dir: "./noise_data/"
 model_dir: "./" # cache_directory "location of model's checkpoints"
 data_cache_dir: "" # cache_directory "location of data"
+tts_dir: "/u/mbaali/CosyVoice/" # ur tts directory
+tts_type: "zero_shot" # zero_shot OR cross-lingual
+tts_lang: 'en'
+
+# ADD TO GITHUB THAT FOR TTS WE NEED TO ADD IT TO GITHUB 
+# ADD reference to cozytts 

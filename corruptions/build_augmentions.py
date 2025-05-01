@@ -13,6 +13,7 @@ from .music import MusicMUSAN, SpeechMUSAN
 from .tremolo import TremoloFilter
 from .tone import TrebleFilter, BassFilter
 from .chorus import ChorusFilter
+from .tts import CosyVoiceTTS
 #from .adv import UniversalAdversarialPerturbation
 
 def build_augmentation(simulate, config):
@@ -40,10 +41,8 @@ def build_augmentation(simulate, config):
         aug = RIR([0, 1, 2, 3, 4])
     elif simulate == 'real_rir':
         aug = RealRIR([0, 1, 2, 3, 4])
-    elif simulate == 'voice_conversion_vctk':
-        aug = VoiceConversionVCTK(config['VC_VCTK_ACCENTS'])
-    elif simulate == 'voice_conversion_bark':
-        aug = BarkTTSSpa(None, None)
+    elif simulate == 'tts':
+        aug = CosyVoiceTTS(pretrained_name='pretrained_models/CosyVoice2-0.5B', tts_type = config['tts_type'], tts_dir=config['tts_dir'], output_dir = config['output_dir'], sr=config['sample_rate'])
     elif simulate == 'resample':
         aug = ResamplingNoise(config['RESAMPLING_FACTORS'],config['sample_rate'])
     elif simulate == 'gain':
