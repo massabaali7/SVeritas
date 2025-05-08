@@ -3,6 +3,7 @@ from .tedlium     import TEDLIUM
 from .ami         import AMI
 from .voxpopuli   import VoxPopuli
 from .vctk        import VCTK
+from .voxtube     import VoxTube
 
 def build_dataset(dataset_name, config, device):
     if dataset_name == 'LibriSpeech': 
@@ -32,7 +33,12 @@ def build_dataset(dataset_name, config, device):
         dataset = VCTK(
             "DynamicSuperb/SpeakerVerification_VCTK", 
             split='test', 
-            cache_dir=config['data_cache_dir'])    
+            cache_dir=config['data_cache_dir'])   
+    elif dataset_name == 'VoxTube':
+        dataset = VoxTube(
+            "voice-is-cool/voxtube",
+            split='train', 
+            cache_dir=config['data_cache_dir'])
     else: 
         raise NotImplementedError
 
