@@ -108,8 +108,8 @@ class MFA_Conformer(torch.nn.Module):
         speech_sample, sampling_rate = torchaudio.load(speech_wavefile)
         speech_sample =torch.FloatTensor(load_audio(speech_wavefile,second=-1))
         speech_sample = speech_sample.unsqueeze(0)
-        feats = features(speech_sample).to(self.model_location)
+        feats = self.features(speech_sample).to(self.model_location)
         # Get embedding
         with torch.no_grad():
-            embedding = model(feats)
+            embedding = self.model(feats)
         return embeddings
