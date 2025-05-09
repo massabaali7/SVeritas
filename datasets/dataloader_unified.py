@@ -35,7 +35,7 @@ class CommonAudioDataset(Dataset):
         }
 
 
-def dataloader(dataset_path):
+def check_dataloader(dataset_path):
     dataset = CommonAudioDataset(dataset_path)
     loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset_path', type=str, required=True,
                         help="Path to the root directory of the audio dataset")
     args = parser.parse_args()
-    dataloader(args.dataset_path)
+    check_dataloader(args.dataset_path)
 
 
 
