@@ -1,20 +1,26 @@
-from torch.utils.data import DataLoader
-import numpy as np
+import torch
+from torch.utils.data import Dataset, DataLoader
+import os
 
-class DataLoader:
-    def __init__(self, config):
-        self.config = config
-
-    def test_dataloader(self) -> DataLoader:
-        trials = np.loadtxt(self.config['trial_path'], str)
+class SpeakerVerificationDataset(Dataset):
+    def __init__(self, trials):
+        """
+        trials: list or np.array of shape [N, 3], each row is [label, path1, path2]
+        root: root directory for file paths
+        """
         self.trials = trials
-        eval_path = np.unique(np.concatenate((trials.T[1], trials.T[2])))
-
-        print("number of enroll: {}".format(len(set(trials.T[1]))))
-        print("number of test: {}".format(len(set(trials.T[2]))))
-        print("number of evaluation: {}".format(len(eval_path)))
-        # load any dataset this one "Evaluation_Dataset" is dummy 
-        eval_dataset = Evaluation_Dataset(eval_path, root="./wav/")
-        loader = DataLoader(eval_dataset, num_workers=10, shuffle=False, batch_size=1)
-
+    def __len__(self):
+        return len(self.trials)
+    def __getitem__(self, idx):
+        label, file1, file2 = self.trials[idx]
+        label = int(label)  # ensure it's integer 0 or 1
+        return file1, file2, label
+    def val_dataloader(self):
+        trials = np.loadtxt(self.trials, dtype=str)
+        print(f"number of trials: {len(trials)}")
+        dataset = SpeakerVerificationDataset(trials)
+        loader = DataLoader(dataset,
+                            num_workers=10,
+                            shuffle=True,  # shuffle for training-like randomness
+                            batch_size=1)  # one trial per batch
         return loader
