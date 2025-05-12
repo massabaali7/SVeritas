@@ -14,7 +14,7 @@ from .tremolo import TremoloFilter
 from .tone import TrebleFilter, BassFilter
 from .chorus import ChorusFilter
 from .tts import CosyVoiceTTS
-#from .adv import UniversalAdversarialPerturbation
+from .adv import FGSM, PGD, CW
 from .codec import codec_configs, CodecAug
 
 def build_augmentation(simulate, config):
