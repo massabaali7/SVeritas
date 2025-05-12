@@ -15,6 +15,7 @@ from .tone import TrebleFilter, BassFilter
 from .chorus import ChorusFilter
 from .tts import CosyVoiceTTS
 #from .adv import UniversalAdversarialPerturbation
+from .codec import codec_configs, CodecAug
 
 def build_augmentation(simulate, config):
     if simulate == 'UniformNoise':
@@ -71,6 +72,8 @@ def build_augmentation(simulate, config):
         aug = BassFilter(config['BASS_GAIN'])
     elif simulate == 'chorus':
         aug = ChorusFilter(config['CHORUS_DELAY'],config['sample_rate'])
+    elif simulate in codec_configs:
+        aug = CodecAug(simulate, config['sample_rate'])
     elif simulate == 'accent':
         aug = None
     elif simulate == 'itw_nf':
