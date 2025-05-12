@@ -13,6 +13,9 @@ def is_audio_file(filename):
     return any(filename.lower().endswith(ext) for ext in AUDIO_EXTENSIONS)
 
 class CommonAudioDataset(Dataset):
+    """
+    A generic dataset that recursively finds all audio files under a root directory and loads them using torchaudio.
+    """
     def __init__(self, root_dir):
         self.file_paths = []
         for root, _, files in os.walk(root_dir):
@@ -35,7 +38,10 @@ class CommonAudioDataset(Dataset):
         }
 
 
-def check_dataloader(dataset_path):
+def check_entire_dataloader(dataset_path):
+    """
+    Initializes the dataset and DataLoader, then iterates over all samples to verify loading.
+    """
     dataset = CommonAudioDataset(dataset_path)
     loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
@@ -56,8 +62,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset_path', type=str, required=True,
                         help="Path to the root directory of the audio dataset")
     args = parser.parse_args()
-    check_dataloader(args.dataset_path)
-
+    check_entire_dataloader(args.dataset_path)
 
 
 
