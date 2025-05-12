@@ -84,8 +84,12 @@ def build_augmentation(simulate, config):
         aug = None
     elif simulate == 'itw_ff_ami':
         aug = None
-    elif simulate == 'universal_adv':
-        aug = UniversalAdversarialPerturbation(ADV_SNRS)
+    elif simulate == 'fgsm_adv':
+        aug = FGSM(config["model"], config["params"], config["targetd"])
+    elif simulate == 'pgd_adv':
+        aug = PGD(config["model"], config["params"], config["targetd"])
+    elif simulate == 'cw_l2_adv':
+        aug = CW(config["model"], config["params"], config["targetd"])
     else:
         raise ValueError(f"Unknown augmentation type: {simulate}")
 
