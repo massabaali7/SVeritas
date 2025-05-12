@@ -77,7 +77,8 @@ class AbsAdvAttack(torch.nn.Module):
     def __repr__(self):
         return f"AdversarialAttack({self.name})"
 
-    def forward(self, model, x, y=None):
+    def forward(self, model, x, x_tgt, y=None):
+        x = torch.cat((x, x_tgt), dim=0)
         if y == 0:
             y = torch.zeros(x.shape[0])
         else:
@@ -117,6 +118,22 @@ class FGSM(AbsAdvAttack):
     def set_attack(self)
         self.attack = FastGradientMethod(
                 estimator=self.classifier,
+                targeted=self.targeted,
+                **self.attack_config)
+
+class CW(AbsAdvAttack):
+
+    def __init__(self, model, attack_config, targeted=False, **kwargs):
+        super().__init__(model, attack_config, targeted, **kwargs)
+        self.set_name()
+        self.set_attack()
+
+    def set_name(self):
+        self.name = "cw-l2-"+str(self.eps)
+
+    def set_attack(self)
+        self.attack = CarliniL2Method(
+                classifier=self.classifier,
                 targeted=self.targeted,
                 **self.attack_config)
 
