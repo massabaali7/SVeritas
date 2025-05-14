@@ -4,7 +4,6 @@ import sys
 import io
 import numpy as np
 import torch
-import torch
 
 # Codec configurations
 codec_configs = {
@@ -21,6 +20,7 @@ codec_configs = {
     'opus_nb':      {'codec': 'libopus',            'ar': 8000,     'bitrate': '32k'},      # Opus NB
     'opus_mb':      {'codec': 'libopus',            'ar': 12000,    'bitrate': '48k'},      # Opus MB
     'opus_wb':      {'codec': 'libopus',            'ar': 16000,    'bitrate': '64k'},      # Opus WB
+    'mp3':          {'codec': 'libmp3lame',         'ar': 16000,    'bitrate': '128k'},     # MP3 (LAME)
 }
 
 class CodecAug(torch.nn.Module):
@@ -87,6 +87,23 @@ def encode_decode(path_to_audio):
         # run ffmpeg
         proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         out_bytes, _ = proc.communicate(wav_bytes)
+
+        # --- second pass: resample to 16k if needed ---
+        if cfg.get('ar', None) != 16000:
+            cmd2 = [
+                'ffmpeg', '-hide_banner', '-loglevel', 'error',
+                '-f', 's16le',
+                '-ar', str(cfg['ar']),                       # original rate
+                '-ac', str(orig_channels),
+                '-i', 'pipe:0',
+                '-ar', '16000',                              # target rate
+                '-acodec', 'pcm_s16le',
+                '-f', 's16le',
+                '-ac', str(orig_channels),
+                'pipe:1'
+            ]
+            proc2 = subprocess.Popen(cmd2, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            out_bytes, _ = proc2.communicate(out_bytes)
 
         # convert raw PCM bytes to numpy array
         pcm = np.frombuffer(out_bytes, dtype=np.int16)
