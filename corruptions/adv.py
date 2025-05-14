@@ -77,7 +77,7 @@ class AbsAdvAttack(torch.nn.Module):
     def __repr__(self):
         return f"AdversarialAttack({self.name})"
 
-    def forward(self, model, x, x_tgt, y=None):
+    def forward(self, x, x_tgt, y=None):
         x = torch.cat((x, x_tgt), dim=0)
         if y == 0:
             y = torch.zeros(x.shape[0])
@@ -92,11 +92,12 @@ class PGD(AbsAdvAttack):
     def __init__(self, model, attack_config, targeted=False, **kwargs):
         super().__init__(model, attack_config, targeted, **kwargs)
         self.eps = attack_config["eps"]
+        self.max_iter = attack_config["max_iter"]
         self.set_name()
         self.set_attack()
 
     def set_name(self):
-        self.name = "pgd-"+str(self.eps)
+        self.name = "pgd-"+str(self.eps)+"-"+str(self.max_iter)
 
     def set_attack(self):
         self.attack = ProjectedGradientDescentPyTorch(
@@ -121,18 +122,56 @@ class FGSM(AbsAdvAttack):
                 targeted=self.targeted,
                 **self.attack_config)
 
-class CW(AbsAdvAttack):
+class BIM(AbsAdvAttack):
 
     def __init__(self, model, attack_config, targeted=False, **kwargs):
         super().__init__(model, attack_config, targeted, **kwargs)
+        self.eps = attack_config["eps"]
+        self.max_iter = attack_config["max_iter"]
         self.set_name()
         self.set_attack()
 
     def set_name(self):
-        self.name = "cw-l2-"+str(self.eps)
+        self.name = "bim-"+str(self.eps)+"-"+str(self.max_iter)
+
+    def set_attack(self)
+        self.attack = FastGradientMethod(
+                estimator=self.classifier,
+                targeted=self.targeted,
+                **self.attack_config)
+
+class CWL2(AbsAdvAttack):
+
+    def __init__(self, model, attack_config, targeted=False, **kwargs):
+        super().__init__(model, attack_config, targeted, **kwargs)
+        self.confidence = attack_config["confidence"]
+        self.max_iter = attack_config["max_iter"]
+        self.set_name()
+        self.set_attack()
+
+    def set_name(self):
+        self.name = "cw-l2-"+str(self.confidence)+"-"+str(self.max_iter)
 
     def set_attack(self)
         self.attack = CarliniL2Method(
+                classifier=self.classifier,
+                targeted=self.targeted,
+                **self.attack_config)
+
+class CWLInf(AbsAdvAttack):
+
+    def __init__(self, model, attack_config, targeted=False, **kwargs):
+        super().__init__(model, attack_config, targeted, **kwargs)
+        self.confidence = attack_config["confidence"]
+        self.max_iter = attack_config["max_iter"]
+        self.set_name()
+        self.set_attack()
+
+    def set_name(self):
+        self.name = "cw-linf-"+str(self.confidence)+"-"+str(self.max_iter)
+
+    def set_attack(self)
+        self.attack = CarliniLInfMethod(
                 classifier=self.classifier,
                 targeted=self.targeted,
                 **self.attack_config)
