@@ -14,7 +14,7 @@ from .tremolo import TremoloFilter
 from .tone import TrebleFilter, BassFilter
 from .chorus import ChorusFilter
 from .tts import CosyVoiceTTS
-from .adv import FGSM, PGD, CWL2, CWLInf, BIM
+from .adv import FGSM, PGD, CWL2, CWLInf, BIM, BlackBoundaryAttack, BlackHopSkipJump
 from .codec import codec_configs, CodecAug
 
 def build_augmentation(simulate, config):
@@ -85,15 +85,19 @@ def build_augmentation(simulate, config):
     elif simulate == 'itw_ff_ami':
         aug = None
     elif simulate == 'fgsm_adv':
-        aug = FGSM(config["model"], config["params"], config["targetd"])
-    elif simulate == 'fgsm_adv':
-        aug = BIM(config["model"], config["params"], config["targetd"])
+        aug = FGSM(config["model"], config["params"], config["targeted"])
+    elif simulate == 'bim_adv':
+        aug = BIM(config["model"], config["params"], config["targeted"])
     elif simulate == 'pgd_adv':
-        aug = PGD(config["model"], config["params"], config["targetd"])
+        aug = PGD(config["model"], config["params"], config["targeted"])
     elif simulate == 'cw_l2_adv':
-        aug = CWL2(config["model"], config["params"], config["targetd"])
+        aug = CWL2(config["model"], config["params"], config["targeted"])
     elif simulate == 'cw_linf_adv':
-        aug = CWLInf(config["model"], config["params"], config["targetd"])
+        aug = CWLInf(config["model"], config["params"], config["targeted"])
+    elif simulate == 'black_hsj_adv':
+        aug = BlackHopSkipJump(config["model"], config["params"], config["targeted"])
+    elif simulate == 'black_bound_adv':
+        aug = BlackBoundaryAttack(config["model"], config["params"], config["targeted"])
     else:
         raise ValueError(f"Unknown augmentation type: {simulate}")
 
