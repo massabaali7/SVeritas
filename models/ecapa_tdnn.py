@@ -9,7 +9,7 @@ class ECAPA(torch.nn.Module):
         self.model_location = model_location
         self.model_name_or_path = model_name_or_path
         self.ecapa = SpeakerRecognition.from_hparams(source=model_name_or_path, run_opts={"device":model_location}, savedir=cache_dir)
+
     def forward(self, audio):
-        audio = torch.tensor(audio).unsqueeze(0).to(self.model_location)
-        embeddings = self.ecapa(audio)
+        embeddings = self.ecapa.encode_batch(audio.squeeze(0).to(self.model_location)).squeeze()
         return embeddings

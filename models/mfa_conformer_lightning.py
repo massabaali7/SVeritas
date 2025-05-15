@@ -96,20 +96,25 @@ class MFA_Conformer(torch.nn.Module):
         super(MFA_Conformer, self).__init__()
         self.model_location = model_location
         model_init = conformer_cat(n_mels=80, num_blocks=6, output_size=256, 
-        embedding_dim=config['embedding_dim'], input_layer="conv2d2", pos_enc_layer_type="rel_pos").to(model_location)
+        embedding_dim=192, input_layer="conv2d2", pos_enc_layer_type="rel_pos").to(model_location)
         self.features = Mel_Spectrogram()
         self.ckpt = ckpt
-        self.model = CassavaPLModule.load_from_checkpoint(ckpt, hparams={'lr':self.lr, 'batch_size':1}, model=model_init, strict=False)
+        self.model = CassavaPLModule.load_from_checkpoint(ckpt, hparams={'lr':lr, 'batch_size':1}, model=model_init, strict=False)
         self.model.eval()
         self.model.cuda()
         self.model.freeze()  #Will get a CUDA memory error without this
 
     def forward(self, audio):
-        speech_sample, sampling_rate = torchaudio.load(speech_wavefile)
-        speech_sample =torch.FloatTensor(load_audio(speech_wavefile,second=-1))
-        speech_sample = speech_sample.unsqueeze(0)
-        feats = self.features(speech_sample).to(self.model_location)
+        # Uncomment if you're loading the wav file  
+        #speech_sample, sampling_rate = torchaudio.load(speech_wavefile) 
+        #speech_sample =torch.FloatTensor(load_audio(speech_wavefile,second=-1)) 
+        # speech_sample = speech_sample.unsqueeze(0)
+        if len(audio.size()) > 2:
+            audio = audio.squeeze(0).to(self.model_location)
+        else:
+            audio = audio.to(self.model_location)
+        feats = self.features(audio).to(self.model_location)
         # Get embedding
         with torch.no_grad():
-            embedding = self.model(feats)
+            embeddings = self.model(feats)
         return embeddings

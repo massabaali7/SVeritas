@@ -15,7 +15,8 @@ class Redimnet(torch.nn.Module):
         ).to(model_location)
         self.redimnet_model.eval()
     def forward(self, audio):
-        audio = torch.tensor(audio, dtype=torch.float32).unsqueeze(0).to(self.model_location)
+        #audio = torch.tensor(audio, dtype=torch.float32).unsqueeze(0).to(self.model_location) # one sample
+        audio = audio.squeeze(0).to(self.model_location)
         with torch.no_grad():
             embeddings = self.redimnet_model(audio)
         return embeddings

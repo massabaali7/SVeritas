@@ -8,10 +8,10 @@ import pandas as pd
 import soundfile as sf 
 class RIR(torch.nn.Module):
     seed = 9983137
-    def __init__(self, sev, rir_dir=None, rir_t60_file='rir_t60.csv') -> None:
+    def __init__(self, sev, rir_dir=None, rir_t60_file='./noise_data/rir_t60.csv') -> None:
         super().__init__()
         assert sev <= 4
-        self.rir_dir = rir_dir if rir_dir is not None else f'{os.environ["noise_dir"]}/RIRS_NOISES/simulated_rirs'
+        self.rir_dir = rir_dir if rir_dir is not None else "./noise_data/RIRS_NOISES/simulated_rirs" #f'{os.environ["noise_dir"]}/RIRS_NOISES/simulated_rirs'
         # self.rir_files = [x for x in os.listdir(rir_dir) if x.endswith('.wav')]
         rir_files = []
         for root, dirs, files in os.walk(self.rir_dir):
@@ -45,16 +45,20 @@ class RIR(torch.nn.Module):
             return rir
         rir = get_random_rir()
         rir = rir / torch.norm(rir, p=2)
-        rir = rir[0].reshape(-1).to(x.device)
+        rir = rir.squeeze().to(x.device)  # make sure rir is 1D
+        if x.dim() != rir.dim():
+            x = x.squeeze()  # ensure x is also 1D if needed
+
+        #rir = rir[0].reshape(-1).to(x.device)
         x_ = torchaudio.functional.fftconvolve(x, rir)
         return x_
 
 class RealRIR(torch.nn.Module):
     seed = 9983137
-    def __init__(self, sev, rir_dir=None, rir_t60_file='rir_snr.csv') -> None:
+    def __init__(self, sev, rir_dir=None, rir_t60_file='./noise_data/rir_snr.csv') -> None:
         super().__init__()
         assert sev <= 4
-        self.rir_dir = rir_dir if rir_dir is not None else f'{os.environ["noise_dir"]}/RIRS_NOISES/real_rirs_isotropic_noises'
+        self.rir_dir = rir_dir if rir_dir is not None else "./noise_data/RIRS_NOISES/real_rirs_isotropic_noises"
         # self.rir_files = [x for x in os.listdir(rir_dir) if x.endswith('.wav')]
         rir_files = []
         for root, dirs, files in os.walk(self.rir_dir):
@@ -101,14 +105,17 @@ class RealRIR(torch.nn.Module):
             return rir
         rir = get_random_rir()
         rir = rir / torch.norm(rir, p=2)
-        rir = rir[0].reshape(-1).to(x.device)
+        #rir = rir[0].reshape(-1).to(x.device)
+        rir = rir.squeeze().to(x.device)  # make sure rir is 1D
+        if x.dim() != rir.dim():
+            x = x.squeeze()  # ensure x is also 1D if needed
         x_ = torchaudio.functional.fftconvolve(x, rir)
         return x_
 
 class RIR_RoomSize(torch.nn.Module):
     def __init__(self, room_type, rir_dir=None) -> None:
         super().__init__()
-        self.rir_dir = rir_dir if rir_dir is not None else f'{os.environ["noise_dir"]}/RIRS_NOISES/simulated_rirs'
+        self.rir_dir = rir_dir if rir_dir is not None else "./noise_data/RIRS_NOISES/simulated_rirs"
         rir_files = []
         for root, dirs, files in os.walk(self.rir_dir):
             for name in files:
@@ -130,6 +137,9 @@ class RIR_RoomSize(torch.nn.Module):
             return rir
         rir = get_random_rir()
         rir = rir / torch.norm(rir, p=2)
-        rir = rir[0].reshape(-1).to(x.device)
+        rir = rir.squeeze().to(x.device)  # make sure rir is 1D
+        if x.dim() != rir.dim():
+            x = x.squeeze()  # ensure x is also 1D if needed
+        #rir = rir[0].reshape(-1).to(x.device)
         x_ = torchaudio.functional.fftconvolve(x, rir)
         return x_

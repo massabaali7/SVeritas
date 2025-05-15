@@ -1,0 +1,71 @@
+import argparse
+import yaml
+import os
+import sys
+import torch
+import numpy as np
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+from models.build_model import build_model
+from datasets_list.build_dataset import build_dataset
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Extract embeddings for utterances.")
+
+    # Config
+    parser.add_argument("--config", type=str, default="./config/default.yaml", help="Config file with parameters")
+
+    # Override args
+    parser.add_argument("--dataset_name", type=str, default="multilingualTEDx")
+    parser.add_argument("--segment_file", type=str, help="Path to segment file")
+    parser.add_argument("--audio_root", type=str, help="Root directory of audio files")
+    parser.add_argument("--lang", type=str, default="ar", help="Language code")
+    parser.add_argument("--model_name", type=str, help="Name of the embedding model")
+    parser.add_argument("--embeddings_dir", type=str, default="./embeddings", help="Directory to save embeddings")
+
+    # first parse of command-line args to check for config file
+    args = parser.parse_args()
+    
+    # If a config file is specified, load it and set defaults
+    if args.config is not None:
+        with open(args.config, 'r', encoding='utf-8') as f:
+            config_args = yaml.safe_load(f)
+            parser.set_defaults(**config_args)
+
+    # re-parse command-line args to overwrite with any command-line inputs
+    args = parser.parse_args()
+    return args, config_args
+
+
+def main():
+    args, config = parse_args()
+
+    # Setup
+    device = torch.device(config["device"])
+    meta_path = config['meta_path']
+    root_directory = config['audio_root'] 
+    lang = config['data_lang']
+    list_models = ['MFA_Conformer', 'MFA_Conformer_CAARMA', 'wavLMBase', 'wavLMBasePlus'] #'Redimnet', 'ECAPA', 
+
+    dataset = build_dataset(config["dataset_name"], config, device, meta_path, root_directory, lang)
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=2)
+    print(f"Loaded {len(dataset)} utterances.")
+    for model_name in list_models:
+        model = build_model(model_name, config).to(device)
+        # Iterate and extract embeddings
+        for batch in dataloader:
+            utt_id = batch['filename'][0].split("/")[1].split('.wav')[0] #batch['filename'][0].split(".wav")[0]         # e.g., 'xzMcjMdrLIo_0273'
+            speaker_id = batch['sid'][0]  # e.g., 'xzMcjMdrLIo'
+            waveform = batch['audio_tensor']    # Replace this for one file with waveform,sr = torchaudio.load("file.wav")
+            embedding = model(waveform)  
+            # # Save embeddings
+            spk_dir = os.path.join(config['embeddings_dir'], config["dataset_name"], speaker_id, model_name)
+            os.makedirs(spk_dir, exist_ok=True)
+            filename = f"{utt_id}.npy"
+            filepath = os.path.join(spk_dir, filename)
+            np.save(filepath, embedding.cpu().numpy())
+            print(f"Embeddings saved {filepath}")
+
+
+if __name__ == "__main__":
+    main()

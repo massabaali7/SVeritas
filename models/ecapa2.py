@@ -13,6 +13,7 @@ class ECAPA2(torch.nn.Module):
             self.ecapa2 = torch.jit.load(model_file, map_location=model_location)
             self.ecapa2.half() # optional, but results in faster inference
     def forward(self, audio):
-        embeddings = self.ecapa2(audio)
+        audio = audio.squeeze(0)
+        embeddings = self.ecapa2(audio.to(self.model_location))
         # check later whether we need to squeeze unsqueeze etc.
         return embeddings
