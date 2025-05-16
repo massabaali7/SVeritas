@@ -5,8 +5,9 @@ from .gain import Gain
 from .echo import Echo
 from .filtering import LowPassFilter, HighPassFilter
 from .music import MusicMUSAN, SpeechMUSAN
-from .adv import FGSM, PGD, CWL2, CWLInf, BIM
 from .codec import codec_configs, CodecAug
+
+from speaker_guard_asv import FGSMAttack, PGDAttack, CW2Attack, CWInfAttack, BlackFakeBobAttack, BlackSirenAttack
 #from .tts import CosyVoiceTTS
 
 def build_augmentation(simulate, config):
@@ -45,15 +46,17 @@ def build_augmentation(simulate, config):
     elif simulate in codec_configs:
         aug = CodecAug(simulate, config['sample_rate'])
     elif simulate == 'fgsm_adv':
-        aug = FGSM(config["model"], config["params"], config["targetd"])
-    elif simulate == 'fgsm_adv':
-        aug = BIM(config["model"], config["params"], config["targetd"])
+        aug = FGSMAttack(config["model"], config)
     elif simulate == 'pgd_adv':
-        aug = PGD(config["model"], config["params"], config["targetd"])
+        aug = PGDAttack(config["model"], config)
     elif simulate == 'cw_l2_adv':
-        aug = CWL2(config["model"], config["params"], config["targetd"])
+        aug = CW2Attack(config["model"], config)
     elif simulate == 'cw_linf_adv':
-        aug = CWLInf(config["model"], config["params"], config["targetd"])
+        aug = CWLInfAttack(config["model"], config)
+    elif simulate == 'fkb_adv':
+        aug = BlackFakeBobAttack(config["model"], config)
+    elif simulate == 'sa_adv':
+        aug = BlackSirenAttack(config["model"], config)
     else:
         raise ValueError(f"Unknown augmentation type: {simulate}")
 
