@@ -2,9 +2,12 @@
 
 device: cuda
 threshold: 0.0
-
+requires_grad: True
+sample_rate: 16000
+ckpt: /cfs/home/u020399/sv_scripts/models/mfa_conformer.ckpt
+model_dir: /cfs/home/u020399/sv_scripts/external/models/
 attack:
-  confidence: 0.5
-  max_iter: 1000
-  stop_early_iter: 100
+  confidence: 0.4
+  max_iter: 10
+  stop_early_iter: 10
   threshold: 0.0 # Should be the same as above

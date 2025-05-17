@@ -3,10 +3,14 @@
 device: cuda
 threshold: 0.0
 
+requires_grad: True
+sample_rate: 16000
+ckpt: /cfs/home/u020399/sv_scripts/models/mfa_conformer.ckpt
+model_dir: /cfs/home/u020399/sv_scripts/external/models/
 attack:
   epsilon: 0.1
   confidence: 0.0
-  max_iter: 1000       # Decrease for faster inference
-  stop_early_iter: 100 # Decrease for faster inference
+  max_iter: 10       # Decrease for faster inference
+  stop_early_iter: 5 # Decrease for faster inference
   samples_per_draw_batch_size: 2 # Do not change!
   threshold: 0.0 # Should be the same as above

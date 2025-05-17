@@ -3,12 +3,16 @@
 device: cuda
 threshold: 0.0
 
+requires_grad: True
+sample_rate: 16000
+ckpt: /cfs/home/u020399/sv_scripts/models/mfa_conformer.ckpt
+model_dir: /cfs/home/u020399/sv_scripts/external/models/
 attack:
   epsilon: 0.1
   confidence: 0.0
   max_epoch: 10      # Adjust for success rate and inference time
-  max_iter: 50       # Decrease for faster inference
+  max_iter: 10       # Decrease for faster inference
   n_particles: 25    # Number of candidates for perturbation
-  abort_early_iter: 100 # Decrease for faster inference
+  abort_early_iter: 10 # Decrease for faster inference
   abort_early_epoch: 5 # Same as above
   threshold: 0.0 # Should be the same as above

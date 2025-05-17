@@ -8,6 +8,13 @@ class ASVWrapper(torch.nn.Module):
         self.device = device
         self.score_fn = score_fn
         self.threshold = threshold
+        self.tgt_set = False
+
+    def set_tgt(self, x):
+        with torch.no_grad():
+            enroll_embs = self.model(x)
+        self.enroll_embs = enroll_embs
+        self.tgt_set = True
 
     def forward(self, x, x_tgt):    
  
@@ -19,9 +26,12 @@ class ASVWrapper(torch.nn.Module):
 
         # Get test and enrollment utterances
         test_utts = x
-        with torch.no_grad():
-            enroll_utts = x_tgt.to(x.device)
-            enroll_embs = self.model(enroll_utts)
+        if not self.tgt_set:
+            with torch.no_grad():
+                enroll_utts = x_tgt.to(x.device)
+                enroll_embs = self.model(enroll_utts)
+        else:
+            enroll_embs = self.enroll_embs
 
         # Forward pass through model for test with grad
         test_embs = self.model(test_utts)
@@ -40,17 +50,20 @@ class ASVWrapper(torch.nn.Module):
     def batched_forward(self, x, x_tgt):    
         # Get test and enrollment utterances
         test_utts = x
-        with torch.no_grad():
-            enroll_utts = x_tgt.to(x.device)
-            enroll_embs = []
-            for utt in enroll_utts:
-                enroll_embs.append(self.model(utt.unsqueeze(dim=0)))
-            enroll_embs = torch.cat(enroll_embs, dim=0)
+        if not self.tgt_set:
+            with torch.no_grad():
+                enroll_utts = x_tgt.to(x.device)
+                enroll_embs = []
+                for utt in enroll_utts:
+                    enroll_embs.append(self.model(utt.unsqueeze(dim=0)))
+                enroll_embs = torch.cat(enroll_embs, dim=0)
+        else:
+            enroll_embs = self.enroll_embs.squeeze().unsqueeze(dim=0).repeat(test_utts.shape[0],1)
 
         # Forward pass through model for test with grad
         test_embs = []
         for utt in test_utts:
-            test_embs.append(self.model(utt.unsqueeze(dim=0)))
+            test_embs.append(self.model(utt.unsqueeze(dim=0)).unsqueeze(dim=0))
         test_embs = torch.cat(test_embs, dim=0)
 
         # Compute scores (e.g. cosine similarity)
@@ -63,3 +76,4 @@ class ASVWrapper(torch.nn.Module):
 
         decisions = scores >= self.threshold
         return decisions, scores
+

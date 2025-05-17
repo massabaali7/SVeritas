@@ -7,7 +7,7 @@ from .filtering import LowPassFilter, HighPassFilter
 from .music import MusicMUSAN, SpeechMUSAN
 from .codec import codec_configs, CodecAug
 
-from speaker_guard_asv import FGSMAttack, PGDAttack, CW2Attack, CWInfAttack, BlackFakeBobAttack, BlackSirenAttack
+from .speaker_guard_asv import FGSMAttack, PGDAttack, CW2Attack, CWInfAttack, BlackFakeBobAttack, BlackSirenAttack
 #from .tts import CosyVoiceTTS
 
 def build_augmentation(simulate, config):
@@ -52,7 +52,7 @@ def build_augmentation(simulate, config):
     elif simulate == 'cw_l2_adv':
         aug = CW2Attack(config["model"], config)
     elif simulate == 'cw_linf_adv':
-        aug = CWLInfAttack(config["model"], config)
+        aug = CWInfAttack(config["model"], config)
     elif simulate == 'fkb_adv':
         aug = BlackFakeBobAttack(config["model"], config)
     elif simulate == 'sa_adv':

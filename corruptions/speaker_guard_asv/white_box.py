@@ -272,7 +272,6 @@ class CW2(FGSM):
                 
                 if self.stop_early and n_iter % self.stop_early_iter == 0:
                     if np.mean(loss) > 0.9999 * prev_loss:
-                        print("Early Stop ! ")
                         continue_flag = False
                     prev_loss = np.mean(loss)
 

@@ -2,7 +2,10 @@
 
 device: cuda
 threshold: 0.0
-
+requires_grad: True
+sample_rate: 16000
+ckpt: /cfs/home/u020399/sv_scripts/models/mfa_conformer.ckpt
+model_dir: /cfs/home/u020399/sv_scripts/external/models/
 attack:
   epsilon: 0.1
   step_size: 0.002

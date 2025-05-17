@@ -11,6 +11,7 @@ class AbsAdvAttack(torch.nn.Module):
         super().__init__(**kwargs)
 
         self.config = config
+        self.device = config["device"]
         self.attack_config = config["attack"]
         self.classifier = ASVWrapper(model, torch.nn.functional.cosine_similarity, 
                                      config["threshold"], config["device"])
@@ -30,7 +31,10 @@ class AbsAdvAttack(torch.nn.Module):
         return f"AdversarialAttack({self.name})"
 
     def forward(self, x, x_tgt, y):
-        x_adv = self.attack.attack(x, x_tgt, y)
+        x = x.unsqueeze(dim=1).to(self.device)
+        x_tgt = x_tgt.unsqueeze(dim=1).to(self.device)
+        self.attack.model.set_tgt(x_tgt)
+        x_adv = self.attack.attack(x, x_tgt, torch.LongTensor([y]))
         return x_adv
 
 class FGSMAttack(AbsAdvAttack):
@@ -90,7 +94,7 @@ class CWInfAttack(AbsAdvAttack):
         self.set_attack()
 
     def set_name(self):
-        self.name = "cw-linf-"+str(self.confidence)+"-"+str(self.max_iter)
+        self.name = "cw-linf-"+str(self.epsilon)+"-"+str(self.max_iter)
 
     def set_attack(self):
         self.attack = CWinf(self.classifier, task="SV", 
