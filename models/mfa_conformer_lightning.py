@@ -35,6 +35,7 @@ class PreEmphasis(torch.nn.Module):
         inputs = inputs.unsqueeze(1)
         inputs = F.pad(inputs, (1, 0), 'reflect')
         return F.conv1d(inputs, self.flipped_filter).squeeze(1)
+
 class Mel_Spectrogram(nn.Module):
     def __init__(self, sample_rate=16000, n_fft=512, win_length=400, hop=160, n_mels=80, coef=0.97, requires_grad=False):
         super(Mel_Spectrogram, self).__init__()
@@ -65,6 +66,7 @@ class Mel_Spectrogram(nn.Module):
         x = x.permute(0, 2, 1)
         x = x.unsqueeze(1)
         return x
+
 def load_audio(filename, second=3):
     sample_rate, waveform = wavfile.read(filename)
     audio_length = waveform.shape[0]
@@ -92,9 +94,10 @@ class CassavaPLModule(pl.LightningModule):
         return self.model(x)       
 
 class MFA_Conformer(torch.nn.Module):
-    def __init__(self, model_location = 'cuda', ckpt = "/storage1/avis_spk_id/baseline_framework/ckpt/epoch=97_cosine_eer=0.83.ckpt", lr=0.0045):
+    def __init__(self, model_location = 'cuda', ckpt = "/storage1/avis_spk_id/baseline_framework/ckpt/epoch=97_cosine_eer=0.83.ckpt", lr=0.0045, needs_gradients=False):
         super(MFA_Conformer, self).__init__()
         self.model_location = model_location
+        self.needs_gradients = needs_gradients
         model_init = conformer_cat(n_mels=80, num_blocks=6, output_size=256, 
         embedding_dim=192, input_layer="conv2d2", pos_enc_layer_type="rel_pos").to(model_location)
         self.features = Mel_Spectrogram()
@@ -113,8 +116,14 @@ class MFA_Conformer(torch.nn.Module):
             audio = audio.squeeze(0).to(self.model_location)
         else:
             audio = audio.to(self.model_location)
-        feats = self.features(audio).to(self.model_location)
-        # Get embedding
-        with torch.no_grad():
+
+        if not self.needs_gradients:
+            feats = self.features(audio).to(self.model_location)
+            # Get embedding
+            with torch.no_grad():
+                embeddings = self.model(feats)
+        else:
+            feats = self.features(audio).to(self.model_location)
             embeddings = self.model(feats)
+
         return embeddings
