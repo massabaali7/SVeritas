@@ -16,7 +16,7 @@ from abc import ABCMeta, abstractmethod
 class Attack(metaclass=ABCMeta):
 
     @abstractmethod
-    def attack(self, x, y, verbose=1, EOT_size=1, EOT_batch_size=1):
+    def attack(self, x, y, verbose=0, EOT_size=1, EOT_batch_size=1):
         pass
 
     def compare(self, y, y_pred, targeted):
@@ -34,7 +34,7 @@ class FAKEBOB(Attack):
                 samples_per_draw=50, samples_per_draw_batch_size=50, sigma=0.001, momentum=0.9,
                 plateau_length=5, plateau_drop=2.,
                 stop_early=True, stop_early_iter=100,
-                batch_size=1, EOT_size=1, EOT_batch_size=1, verbose=1):
+                batch_size=1, EOT_size=1, EOT_batch_size=1, verbose=0):
         
         self.model = model
         self.threshold = threshold
@@ -231,7 +231,7 @@ class SirenAttack(Attack):
                 task='CSI', targeted=False, confidence=0.,
                 epsilon=0.002, max_epoch=300, max_iter=30,
                 c1=1.4961, c2=1.4961, n_particles=25, w_init=0.9, w_end=0.1,
-                batch_size=1, EOT_size=1, EOT_batch_size=1, verbose=1, abort_early=True, abort_early_iter=10, abort_early_epoch=10):
+                batch_size=1, EOT_size=1, EOT_batch_size=1, verbose=0, abort_early=True, abort_early_iter=10, abort_early_epoch=10):
         
         self.model = model
         self.threshold = threshold

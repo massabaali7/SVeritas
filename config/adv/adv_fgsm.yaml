@@ -1,0 +1,8 @@
+# Corruptions Attribute
+
+device: cuda
+threshold: 0.0
+
+attack:
+  epsilon: 0.1
+  threshold: 0.0 # Should be the same as above

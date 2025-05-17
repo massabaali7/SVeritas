@@ -116,7 +116,7 @@ class BlackSirenAttack(AbsAdvAttack):
 
     def __init__(self, model, config, **kwargs):
         super().__init__(model, config, **kwargs)
-        self.eps = self.attack_config["eps"]
+        self.eps = self.attack_config["epsilon"]
         self.max_iter = self.attack_config["max_iter"]
         self.set_name()
         self.set_attack()

@@ -1,0 +1,10 @@
+# Corruptions Attribute
+
+device: cuda
+threshold: 0.0
+
+attack:
+  confidence: 0.5
+  max_iter: 1000
+  stop_early_iter: 100
+  threshold: 0.0 # Should be the same as above
