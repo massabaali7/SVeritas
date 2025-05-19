@@ -33,7 +33,7 @@ class AbsAdvAttack(torch.nn.Module):
     def forward(self, x, x_tgt, y):
         x = x.unsqueeze(dim=1).to(self.device)
         x_tgt = x_tgt.unsqueeze(dim=1).to(self.device)
-        self.attack.model.set_tgt(x_tgt)
+        self.attack.model.set_tgt(x_tgt.squeeze(dim=1))
         x_adv = self.attack.attack(x, x_tgt, torch.LongTensor([y]))
         return x_adv
 

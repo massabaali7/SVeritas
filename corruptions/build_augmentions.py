@@ -49,9 +49,9 @@ def build_augmentation(simulate, config):
         aug = FGSMAttack(config["model"], config)
     elif simulate == 'pgd_adv':
         aug = PGDAttack(config["model"], config)
-    elif simulate == 'cw_l2_adv':
+    elif simulate == 'cw2_adv':
         aug = CW2Attack(config["model"], config)
-    elif simulate == 'cw_linf_adv':
+    elif simulate == 'cwinf_adv':
         aug = CWInfAttack(config["model"], config)
     elif simulate == 'fkb_adv':
         aug = BlackFakeBobAttack(config["model"], config)

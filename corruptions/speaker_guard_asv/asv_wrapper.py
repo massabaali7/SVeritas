@@ -64,7 +64,7 @@ class ASVWrapper(torch.nn.Module):
         test_embs = []
         for utt in test_utts:
             test_embs.append(self.model(utt.unsqueeze(dim=0)).unsqueeze(dim=0))
-        test_embs = torch.cat(test_embs, dim=0)
+        test_embs = torch.cat(test_embs, dim=0).squeeze(dim=1)
 
         # Compute scores (e.g. cosine similarity)
         if test_embs.ndim > 1:
