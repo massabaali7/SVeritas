@@ -92,9 +92,12 @@ class MyDataset(torch.nn.Module):
         super(MyDataset, self).__init__()
         # Init logic here
 
-    def forward(self, audio):
-        # Return dataset/audio
-        pass
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, index):
+        sample = self.dataset[index]
+        # Return sample
 ```
 
 Add it to `build_dataset.py`:
@@ -157,4 +160,4 @@ def build_augmentation(simulate, config):
     ...
 ```
 # Run simulation on a single sample
-```python testing/simulate_single_sample.py --simulate 'echo' --waveform filename.wav ```
+```python testing/simulate_single_sample.py --simulate 'GuassianNoise' --waveform filename.wav ```
