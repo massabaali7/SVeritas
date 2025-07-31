@@ -4,20 +4,11 @@ simulate: 'echo'
 # Corruptions Attribute
 NOISE_SNRS: 30 #[40, 30, 20, 10, 0]
 ADV_SNRS: [50, 40, 30, 20, 10]
-SPEEDUP_FACTORS: 1.25 #[1, 1.25, 1.5, 1.75, 2]
-SLOWDOWN_FACTORS: 1 #0.75 #[1, 0.875, 0.75, 0.625, 0.5]
-PITCH_UP_STEPS: 3 #[0, 3, 6, 9, 12]
-PITCH_DOWN_STEPS: -3 #[0, -3, -6, -9, -12]
 RESAMPLING_FACTORS: 0.75 #[1, 0.75, 0.5, 0.25, 0.125]
 GAIN_FACTORS: 10 #[0, 10, 20, 30, 40]
 ECHO_DELAYS: 500 #[0, 125, 250, 500, 1000]
-PHASER_DECAYS: 0.3 # [0.1, 0.3, 0.5, 0.7, 0.9]
 LOWPASS_FREQS: 8000 #[8000, 4000, 2833, 1666, 500]
 HIGHPASS_FREQS: 1500 #[0, 875, 1500, 2125, 3000]
-TREMOLO_DEPTHS: 75 #[0, 62, 75, 87, 100]
-TREBLE_GAIN: 36 #[1, 18, 27, 36, 45]
-BASS_GAIN: 28 #[1, 28, 35, 43, 50]
-CHORUS_DELAY: 30 #[0, 30, 50, 70, 90]
 
 # Dataset Params. 
 sample_rate: 16000
@@ -33,6 +24,5 @@ tts_dir: "/u/mbaali/CosyVoice/" # ur tts directory
 tts_type: "zero_shot" # zero_shot OR cross-lingual
 tts_lang: 'en'
 
-# ADD TO GITHUB THAT FOR TTS WE NEED TO ADD IT TO GITHUB 
-# ADD reference to cozytts 
-# ADD ckpt to mfa conformer and caarma mfa here 
+# Checkpoint for MFA Conformer
+mfa_ckpt: 'model.ckpt'
