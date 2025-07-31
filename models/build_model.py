@@ -16,7 +16,7 @@ def build_model(model, config):
     elif model == 'wavLMBasePlus':
         model = wavLMBase(model_name = "microsoft/wavlm-base-plus-sv",sr = config['sample_rate'], model_location = config['device'], needs_gradients=config["requires_grad"])
     elif model == 'MFA_Conformer':
-        model = MFA_Conformer(model_location = config['device'], ckpt = "/ocean/projects/cis220031p/mbaali/sv_benchmark/epoch=17_cosine_eer=0.86.ckpt", lr=0.001, needs_gradients=config["requires_grad"])
+        model = MFA_Conformer(model_location = config['device'], ckpt = config['mfa_ckpt'], lr=0.001, needs_gradients=config["requires_grad"])
 
     else: 
         raise NotImplementedError
