@@ -23,17 +23,11 @@ speaker-verification-benchmark/
 ├── corruptions/           # Audio corruptions & augmentations
 │   ├── echo.py
 │   ├── gain.py
-│   ├── pitch.py
 │   ├── rir.py
 │   ├── resample.py
 │   ├── filtering.py
-│   ├── speed.py
-│   ├── tempo.py
-│   ├── chorus.py
-│   ├── tremolo.py
-│   ├── tone.py
-│   ├── phaser.py
 │   ├── music.py
+│   ├── speaker_guard_asv/ # Adversarial Attacks
 │   ├── load_augmentations.py
 │   └── build_aug.py
 ├── utils/                 # Utility scripts
