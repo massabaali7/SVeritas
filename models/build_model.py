@@ -3,6 +3,7 @@ from .ecapa_tdnn import ECAPA
 from .redimnet import Redimnet
 from .wavLMBase import wavLMBase
 from .mfa_conformer_lightning import MFA_Conformer
+from .titanet import Titanet
 
 def build_model(model, config):
     if model == 'ECAPA2':
@@ -17,7 +18,8 @@ def build_model(model, config):
         model = wavLMBase(model_name = "microsoft/wavlm-base-plus-sv",sr = config['sample_rate'], model_location = config['device'], needs_gradients=config["requires_grad"])
     elif model == 'MFA_Conformer':
         model = MFA_Conformer(model_location = config['device'], ckpt = config['mfa_ckpt'], lr=0.001, needs_gradients=config["requires_grad"])
-
+    elif model == 'TitaNet': 
+        model = Titanet(model_name_or_path = "nvidia/speakerverification_en_titanet_large", model_location = config['device'])
     else: 
         raise NotImplementedError
 
