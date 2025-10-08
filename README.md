@@ -164,8 +164,6 @@ def build_augmentation(simulate, config):
 
 ## References
 ```https://github.com/ahmedshah1494/speech_robust_bench ```
-```
-
 
 ## 📌 Citation
 
