@@ -155,3 +155,30 @@ def build_augmentation(simulate, config):
 ```
 # Run simulation on a single sample
 ```python testing/simulate_single_sample.py --simulate 'GuassianNoise' --waveform filename.wav ```
+
+# Run embedding extractor
+```python embedding_extraction_EARS.py --config config/default.yaml ```
+
+# Run pairing by group (To compute EER on subgroup)
+```python pairing_by_group.py --config config/default.yaml --group_by gender,age ```
+
+## References
+```https://github.com/ahmedshah1494/speech_robust_bench ```
+```
+
+
+## 📌 Citation
+
+If you find this useful in your research, please cite us:
+
+```bibtex
+@misc{SVeritas,
+  title = {SVeritas: Benchmark for Robust Speaker Verification under Diverse Conditions},
+  author = {Massa Baali and Sarthak Bisht and Francisco Teixeira and Kateryna Shapovalenko and Rita Singh and Bhiksha Raj},
+  year={2025},
+  eprint={2509.17091},
+  archivePrefix={arXiv},
+  url={https://arxiv.org/abs/2509.17091},
+  primaryClass={cs.CL}
+}
+```
