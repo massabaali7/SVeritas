@@ -172,7 +172,7 @@ If you find this useful in your research, please cite us:
 ```bibtex
 @misc{SVeritas,
   title = {SVeritas: Benchmark for Robust Speaker Verification under Diverse Conditions},
-  author = {Massa Baali and Sarthak Bisht and Francisco Teixeira and Kateryna Shapovalenko and Rita Singh and Bhiksha Raj},
+  author = {Massa Baali and Sarthak Bisht and Francisco Teixeira and Kateryna Shapovalenko and Shravanth Srinivas and Rita Singh and Bhiksha Raj},
   year={2025},
   eprint={2509.17091},
   archivePrefix={arXiv},
