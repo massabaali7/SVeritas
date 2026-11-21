@@ -8,19 +8,19 @@ import torch
 
 # Codec configurations
 codec_configs = {
-    'pcm_mulaw':    {'codec': 'pcm_mulaw',          'ar': 8000,     'bitrate': '64k'},      # G.711 µ-law
-    'pcm_alaw':     {'codec': 'pcm_alaw',           'ar': 8000,     'bitrate': '64k'},      # G.711 A-law                                   
-    'g722':         {'codec': 'g722',               'ar': 16000,    'bitrate': '64k'},      # G.722
-    'g726':         {'codec': 'adpcm_g726',         'ar': 8000,     'bitrate': '40k'},      # G.726
-    'gsm':          {'codec': 'gsm',                'ar': 8000,     'bitrate': '13.2k'},    # GSM 6.10 FR
-    'ilbc':         {'codec': 'ilbc',               'ar': 8000,     'bitrate': '15.2k'},    # iLBC  
-    'amr_nb':       {'codec': 'libopencore_amrnb',  'ar': 8000,     'bitrate': '12.2k'},    # AMR NB
-    'amr_wb':       {'codec': 'libvo_amrwbenc',     'ar': 16000,    'bitrate': '23.85k'},   # AMR WB
-    'speex_nb':     {'codec': 'libspeex',           'ar': 8000,     'bitrate': '8k'},       # Speex NB  
-    'speex_wb':     {'codec': 'libspeex',           'ar': 16000,    'bitrate': '11.2k'},    # Speex WB    
-    'opus_nb':      {'codec': 'libopus',            'ar': 8000,     'bitrate': '32k'},      # Opus NB
-    'opus_mb':      {'codec': 'libopus',            'ar': 12000,    'bitrate': '48k'},      # Opus MB
-    'opus_wb':      {'codec': 'libopus',            'ar': 16000,    'bitrate': '64k'},      # Opus WB
+    'pcm_mulaw':    {'codec': 'pcm_mulaw',          'ar': 8000,     'bitrate': '64k',   'fmt': 'wav'},  # G.711 µ-law
+    'pcm_alaw':     {'codec': 'pcm_alaw',           'ar': 8000,     'bitrate': '64k',   'fmt': 'wav'},  # G.711 A-law                                   
+    'g722':         {'codec': 'g722',               'ar': 16000,    'bitrate': '64k',   'fmt': 'g722'}, # G.722
+    'g726':         {'codec': 'adpcm_g726',         'ar': 8000,     'bitrate': '40k',   'fmt': 'wav'},  # G.726
+    'gsm':          {'codec': 'gsm',                'ar': 8000,     'bitrate': '13.2k', 'fmt': 'gsm'},  # GSM 6.10 FR
+    'ilbc':         {'codec': 'ilbc',               'ar': 8000,     'bitrate': '15.2k', 'fmt': 'ilbc'}, # iLBC  
+    'amr_nb':       {'codec': 'libopencore_amrnb',  'ar': 8000,     'bitrate': '12.2k', 'fmt': 'amr'},  # AMR NB
+    'amr_wb':       {'codec': 'libvo_amrwbenc',     'ar': 16000,    'bitrate': '23.85k','fmt': 'amr'},  # AMR WB
+    'speex_nb':     {'codec': 'libspeex',           'ar': 8000,     'bitrate': '8k',    'fmt': 'ogg'},  # Speex NB  
+    'speex_wb':     {'codec': 'libspeex',           'ar': 16000,    'bitrate': '11.2k', 'fmt': 'ogg'},  # Speex WB    
+    'opus_nb':      {'codec': 'libopus',            'ar': 8000,     'bitrate': '32k',   'fmt': 'ogg'},  # Opus NB
+    'opus_mb':      {'codec': 'libopus',            'ar': 12000,    'bitrate': '48k',   'fmt': 'ogg'},  # Opus MB
+    'opus_wb':      {'codec': 'libopus',            'ar': 16000,    'bitrate': '64k',   'fmt': 'ogg'},  # Opus WB
 }
 
 class CodecAug(torch.nn.Module):
@@ -37,15 +37,56 @@ class CodecAug(torch.nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # convert torch -> numpy
         arr = x.detach().cpu().numpy()
-        # ffmpeg path uses float64
-        arr = arr.astype(np.float64)
-        decoded = encode_decode(arr, self.sample_rate)[self.codec_name]
-        t = torch.from_numpy(decoded).to(x.device)
-        # handle dims: numpy frames x channels -> torch [channels, frames]
+        cfg = codec_configs[self.codec_name]
         if x.ndim == 1:
-            return t.reshape(-1)
+            decoded = codec_roundtrip(arr, self.sample_rate, cfg)
         else:
-            return t.T
+            # [channels, frames]: the narrowband codecs are mono, so code each channel on its own
+            decoded = np.stack([codec_roundtrip(ch, self.sample_rate, cfg) for ch in arr])
+        return torch.from_numpy(decoded).to(device=x.device, dtype=x.dtype)
+
+def codec_roundtrip(data, sr, cfg):
+    """
+    Encodes a mono waveform (1D float array in [-1,1]) with the codec in cfg,
+    decodes it back to PCM at the original sample rate and returns a float32
+    array of the same length as the input.
+    """
+    buf_in = io.BytesIO()
+    sf.write(buf_in, data, sr, format='WAV')
+
+    # 1) encode. The codec has to be written to a container here; putting a
+    #    second -acodec on the same output would replace the first one.
+    enc_cmd = [
+        'ffmpeg', '-hide_banner', '-loglevel', 'error',
+        '-f', 'wav', '-i', 'pipe:0',
+        '-c:a', cfg['codec'], '-ac', '1',
+    ]
+    if 'ar' in cfg:
+        enc_cmd += ['-ar', str(cfg['ar'])]
+    if 'bitrate' in cfg:
+        enc_cmd += ['-b:a', cfg['bitrate']]
+    enc_cmd += ['-f', cfg['fmt'], 'pipe:1']
+    enc = subprocess.run(enc_cmd, input=buf_in.getvalue(), capture_output=True)
+    if enc.returncode != 0 or not enc.stdout:
+        raise RuntimeError(f"ffmpeg encoding with {cfg['codec']} failed: {enc.stderr.decode(errors='replace')}")
+
+    # 2) decode back to raw PCM16 LE at the original sample rate
+    dec_cmd = [
+        'ffmpeg', '-hide_banner', '-loglevel', 'error',
+        '-f', cfg['fmt'], '-i', 'pipe:0',
+        '-acodec', 'pcm_s16le', '-ar', str(sr), '-ac', '1',
+        '-f', 's16le', 'pipe:1',
+    ]
+    dec = subprocess.run(dec_cmd, input=enc.stdout, capture_output=True)
+    if dec.returncode != 0 or not dec.stdout:
+        raise RuntimeError(f"ffmpeg decoding of {cfg['codec']} failed: {dec.stderr.decode(errors='replace')}")
+
+    pcm = np.frombuffer(dec.stdout, dtype=np.int16).astype(np.float32) / 32768.0   # normalize back to [-1,1]
+    # codecs pad to whole frames: keep the input length
+    n = len(data)
+    if len(pcm) < n:
+        pcm = np.pad(pcm, (0, n - len(pcm)))
+    return pcm[:n]
 
 def encode_decode(path_to_audio):
     """
@@ -58,42 +99,12 @@ def encode_decode(path_to_audio):
     data, sr = sf.read(path_to_audio)                    # float64 in [-1,1]
     orig_channels = data.shape[1] if data.ndim > 1 else 1
     
-    # 2) Serialize to WAV for ffmpeg input
-    buf_in = io.BytesIO()
-    sf.write(buf_in, data, sr, format='WAV')
-    wav_bytes = buf_in.getvalue()
-
     results = {}
     for name, cfg in codec_configs.items():
-        # build ffmpeg command
-        cmd = [
-            'ffmpeg', '-hide_banner', '-loglevel', 'error',
-            '-f', 'wav', '-i', 'pipe:0',                 # read input WAV
-            '-c:a', cfg['codec'],
-        ]
-        if 'ar' in cfg:
-            cmd += ['-ar', str(cfg['ar'])]
-        if 'bitrate' in cfg:
-            cmd += ['-b:a', cfg['bitrate']]
-        # now decode back to raw PCM16 LE
-        cmd += [
-            '-acodec', 'pcm_s16le',
-            '-f', 's16le',
-            # preserve channel count:
-            '-ac', str(orig_channels),
-            'pipe:1'
-        ]
-
-        # run ffmpeg
-        proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        out_bytes, _ = proc.communicate(wav_bytes)
-
-        # convert raw PCM bytes to numpy array
-        pcm = np.frombuffer(out_bytes, dtype=np.int16)
-        # reshape to (n_frames, n_channels)
         if orig_channels > 1:
-            pcm = pcm.reshape(-1, orig_channels)
-        results[name] = pcm.astype(np.float32) / 32768.0   # normalize back to [-1,1]
+            results[name] = np.stack([codec_roundtrip(data[:, c], sr, cfg) for c in range(orig_channels)], axis=1)
+        else:
+            results[name] = codec_roundtrip(data, sr, cfg)
 
     return results
 
